@@ -39,7 +39,7 @@
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) {
-    return n === undefined ? array[array.length -1] : array.slice(Math.max(0, array.length - n), array.length);
+    return n === undefined ? array[array.length - 1] : array.slice(Math.max(0, array.length - n), array.length);
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -83,10 +83,10 @@
     var result = [];
 
     _.each(collection, function(value) {
-        if(test(value)) {
-          result.push(value);
-        }
-    })
+      if (test(value)) {
+        result.push(value);
+      }
+    });
 
     return result;
   };
@@ -102,6 +102,28 @@
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array, isSorted, iterator) {
+    var results = [];
+    var iterator = iterator || _.identity;
+    if (isSorted) {
+      _.each(array, function(value, index, collection) {
+        if (iterator(value) !== iterator(collection[index - 1])) {
+          results.push(iterator(value));
+        }
+      });
+      return results;
+    }
+
+    var unique = {};
+
+    _.each(array, function(value) {
+      unique[iterator(value)] = iterator(value);
+    });
+
+    for (var key in unique) {
+      results.push(unique[key]);
+    }
+
+    return results;
   };
 
 
@@ -110,6 +132,11 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+    var results = [];
+    _.each(collection, function(value, index) {
+      results.push(iterator(value, index, collection));
+    });
+    return results;
   };
 
   /*
@@ -151,6 +178,23 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function(collection, iterator, accumulator) {
+    //check if accumulator exits by creating variable hasAccumulator
+    // each statement to loop through collection
+    var hasAccumulator = accumulator !== undefined;
+    if (!hasAccumulator) {
+      accumulator = collection[0];
+    }
+
+    _.each(collection, function(value) {
+      if (!hasAccumulator) {
+        hasAccumulator = true;
+        return;
+      }
+      accumulator = iterator(accumulator, value);
+    });
+
+    return accumulator;
+
   };
 
   // Determine if the array or object contains a given value (using `===`).
