@@ -488,5 +488,28 @@
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+    //create lastcall variable which holds last call time set to 0 initially to allow for first call
+    var lastCall = 0;
+    var calledAgain = false;
+    //return a function that calls the func
+    return function() {
+      //the returned function should check the time that it was last called
+      //against the wait variable
+      // debugger;
+      var currentDate = Date.now();
+      if ((currentDate - lastCall) > wait) {
+        func();
+        lastCall = Date.now();
+        calledAgain = false;
+      } else {
+        if (!calledAgain) {
+          setTimeout(func, wait - (currentDate - lastCall));
+          lastCall = Date.now() + (wait - (currentDate - lastCall));
+          calledAgain = true;
+        }
+      }
+
+    };
+
   };
 }());
