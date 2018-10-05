@@ -198,13 +198,11 @@
 
 
   // Determine whether all of the elements match a truth test.
-  _.every = function(collection, iterator) {
+  _.every = (collection, iterator) => {
     // TIP: Try re-using reduce() here
     var iterator = iterator || _.identity;
 
-    return _.reduce(collection, function(trues, value) {
-      return trues && Boolean(iterator(value));
-    }, true);
+    return _.reduce(collection, (trues, value) => trues && Boolean(iterator(value)), true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
@@ -212,10 +210,7 @@
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
     var iterator = iterator || _.identity;
-
-    return _.reduce(collection, function(anyTrues, value) {
-      return anyTrues || Boolean(iterator(value));
-    }, false);
+    return !_.every(collection, (value) => !iterator(value));
   };
 
 
@@ -237,14 +232,13 @@
   //   }, {
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
-  _.extend = function(obj) {
-    var argumentArray = Array.prototype.slice.call(arguments);
-    _.each(argumentArray, function(arg) {
+  _.extend = (...obj) => {
+    _.each(obj, function(arg) {
       for (var key in arg) {
-        obj[key] = arg[key];
+        obj[0][key] = arg[key];
       }
     });
-    return obj;
+    return obj[0];
   };
 
   // Like extend, but doesn't ever overwrite a key that already
@@ -271,7 +265,7 @@
 
   // Return a function that can be called at most one time. Subsequent calls
   // should return the previously returned value.
-  _.once = function(func) {
+  _.once = func => {
     // TIP: These variables are stored in a "closure scope" (worth researching),
     // so that they'll remain available to the newly-generated function every
     // time it's called.
@@ -300,7 +294,7 @@
   // _.memoize should return a function that, when called, will check if it has
   // already computed the result for the given argument and return that value
   // instead if possible.
-  _.memoize = function(func) {
+  _.memoize = func => {
 
     var resultObj = {};
 
@@ -320,8 +314,7 @@
   // The arguments for the original function are passed after the wait
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
-  _.delay = function(func, wait) {
-    var argumentsList = Array.prototype.splice.call(arguments, 2);
+  _.delay = (func, wait, ...argumentsList) => {
     setTimeout(function() {
       func.apply(this, argumentsList);
     }, wait);
@@ -338,7 +331,7 @@
   // TIP: This function's test suite will ask that you not modify the original
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
-  _.shuffle = function(array) {
+  _.shuffle = (array) => {
     var arrCopy = array.slice();
     var results = [];
 
@@ -366,9 +359,9 @@
 
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
-  _.invoke = function(collection, functionOrKey, args) {
+  _.invoke = (collection, functionOrKey, args) => {
 
-    return _.map(collection, function(value) {
+    return _.map(collection, value => {
       if (typeof functionOrKey === 'function') {
         return functionOrKey.apply(value, args);
       } else {
@@ -381,7 +374,7 @@
   // If iterator is a string, sort objects by that property with the name
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
-  _.sortBy = function(collection, iterator) {
+  _.sortBy = (collection, iterator) => {
 
     if (typeof iterator === 'function') {
       return collection.sort(function(a, b) {
@@ -399,17 +392,13 @@
   //
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
-  _.zip = function() {
-
-    var args = Array.prototype.slice.apply(arguments);
+  _.zip = (...args) => {
 
     var results = [];
 
-    var maxLength = _.reduce(args, function(acc, value) {
-      return acc >= value.length ? acc : value.length;
-    }, 0);
+    var maxLength = _.reduce(args, (acc, value) => acc >= value.length ? acc : value.length, 0);
 
-    _.each(args, function(arr, index) {
+    _.each(args, (arr, index) => {
       for (var i = 0; i < maxLength; i++) {
         if (index === 0) {
           results.push([arr[i]]);
@@ -425,9 +414,9 @@
   // The new array should contain all elements of the multidimensional array.
   //
   // Hint: Use Array.isArray to check if something is an array
-  _.flatten = function(nestedArray, result) {
+  _.flatten = (nestedArray, result) => {
     var result = result || [];
-    _.each(nestedArray, function(value) {
+    _.each(nestedArray, value => {
       if (Array.isArray(value)) {
         result = result.concat(_.flatten(value));
       } else {
@@ -439,11 +428,11 @@
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
-  _.intersection = function() {
-    var args = Array.prototype.slice.apply(arguments);
+  _.intersection = (...args) => {
+
     var results = args[0].slice();
-    _.each(args, function(arr) {
-      _.each(results, function(item, index) {
+    _.each(args, arr => {
+      _.each(results, (item, index) => {
         if (!arr.includes(item)) {
           results.splice(index);
         }
@@ -454,12 +443,11 @@
 
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
-  _.difference = function(array) {
-    // debugger;
-    var args = Array.prototype.slice.apply(arguments);
-    var results = args[0].slice();
-    _.each(args.slice(1), function(arr) {
-      _.each(results, function(item, index) {
+  _.difference = (array, ...args) => {
+
+    var results = array.slice();
+    _.each(args, (arr) => {
+      _.each(results, (item, index) => {
         if (arr.includes(item)) {
           results.splice(index, 1);
         }
@@ -473,7 +461,7 @@
   // on this function.
   //
   // Note: This is difficult! It may take a while to implement.
-  _.throttle = function(func, wait) {
+  _.throttle = (func, wait) => {
     var lastCall = 0;
     var calledAgain = false;
     return function() {
